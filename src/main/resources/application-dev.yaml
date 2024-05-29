@@ -1,0 +1,49 @@
+spring:
+  config:
+    activate:
+      on-profile: "dev"
+  datasource:
+    url: jdbc:postgresql://localhost:5432/logindemodb
+    username: admin
+    password: admin
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+springdoc:
+  swagger-ui:
+    enabled: true
+
+security:
+  jwt:
+    secret-key: somerandomkey
+    issuer: https://spring-security-login.com
+    validity-in-ms: 3600000 # 1 Hour
+    audience: client-app-name
+
+users:
+  admins:
+    - username: admin1
+      password: admin123
+      firstName: Admin
+      lastName: User1
+    - username: admin2
+      password: admin123
+      firstName: Admin
+      lastName: User2
+  regulars:
+    - username: user1
+      password: user123
+      firstName: Regular
+      lastName: User1
+    - username: user2
+      password: user123
+      firstName: Regular
+      lastName: User2

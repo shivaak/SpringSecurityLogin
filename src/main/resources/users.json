@@ -1,0 +1,20 @@
+{
+  "users": {
+    "admins": [
+      {
+        "username": "admin1",
+        "password": "admin1pass",
+        "firstName": "Admin",
+        "lastName": "One"
+      }
+    ],
+    "regulars": [
+      {
+        "username": "user1",
+        "password": "user1pass",
+        "firstName": "User",
+        "lastName": "One"
+      }
+    ]
+  }
+}
