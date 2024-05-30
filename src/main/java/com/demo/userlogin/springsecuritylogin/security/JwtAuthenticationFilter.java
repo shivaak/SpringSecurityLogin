@@ -3,7 +3,6 @@ package com.demo.userlogin.springsecuritylogin.security;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.demo.userlogin.springsecuritylogin.dto.ErrorResponse;
-import com.demo.userlogin.springsecuritylogin.exception.JwtAuthenticationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -52,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             handleException(request, response, "An error occurred while processing the token", HttpStatus.INTERNAL_SERVER_ERROR, ex);
         } finally {
             // Clear the context after the filter chain execution to avoid any leakage of authentication info
-            SecurityContextHolder.clearContext();
+            //SecurityContextHolder.clearContext();
         }
     }
 
