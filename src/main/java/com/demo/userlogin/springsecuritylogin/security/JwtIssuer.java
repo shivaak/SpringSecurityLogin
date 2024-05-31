@@ -20,6 +20,14 @@ public class JwtIssuer {
     private final JwtProperties jwtProperties;
 
     public String issueToken(UserPrincipal userPrincipal) {
+        return createToken(userPrincipal, jwtProperties.getValidityInMs(), "access");
+    }
+
+    public String issueRefreshToken(UserPrincipal userPrincipal) {
+        return createToken(userPrincipal, jwtProperties.getRefreshTokenValidityInMs(), "refresh");
+    }
+
+    private String createToken(UserPrincipal userPrincipal, long validityInMs, String tokenType) {
         try {
             List<String> roles = userPrincipal.getAuthorities()
                     .stream()
@@ -27,7 +35,7 @@ public class JwtIssuer {
                     .collect(Collectors.toList());
 
             Instant now = Instant.now();
-            Instant expiresAt = now.plus(Duration.ofMillis(jwtProperties.getValidityInMs()));
+            Instant expiresAt = now.plus(Duration.ofMillis(validityInMs));
 
             return JWT.create()
                     .withSubject(userPrincipal.getUsername())
@@ -37,6 +45,7 @@ public class JwtIssuer {
                     .withAudience(jwtProperties.getAudience())
                     .withClaim("username", userPrincipal.getUsername())
                     .withClaim("roles", roles)
+                    .withClaim("type", tokenType)
                     .sign(Algorithm.HMAC256(jwtProperties.getSecretKey()));
         } catch (Exception e) {
             log.error("Error issuing JWT token for user '{}'", userPrincipal.getUsername(), e);

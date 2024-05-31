@@ -19,6 +19,6 @@ public class AdminController {
     public String sayHelloToAdmin(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         log.info("saying hello to admin");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return "Hello, You are an Admin " + userPrincipal.getUsername() + "!";
+        return "Heyyyyyyy, You are an Admin " + userPrincipal.getUsername() + "!";
     }
 }

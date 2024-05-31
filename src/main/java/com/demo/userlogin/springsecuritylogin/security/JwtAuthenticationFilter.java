@@ -39,6 +39,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             DecodedJWT decodedJWT = jwtDecoder.decode(jwtToken);
+
+            // Ensure the token is an access token
+            if (!"access".equals(decodedJWT.getClaim("type").asString())) {
+                handleException(request, response, "Invalid token type for accessing secured API", HttpStatus.UNAUTHORIZED, new JWTVerificationException("Invalid token type"));
+                return;
+            }
+
             UserPrincipal userPrincipal = jwtToUserPrincipalConverter.convert(decodedJWT);
 
             UserPrincipalAuthenticationToken authentication = new UserPrincipalAuthenticationToken(userPrincipal);

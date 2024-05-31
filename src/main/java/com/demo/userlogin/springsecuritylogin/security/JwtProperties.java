@@ -28,4 +28,10 @@ public class JwtProperties {
      * Audience for the JWT token
      */
     private String audience;
+
+
+    /**
+     * Refresh token validity in milliseconds
+     */
+    private long refreshTokenValidityInMs;
 }

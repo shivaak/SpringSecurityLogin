@@ -93,6 +93,4 @@ public class UserController {
                     return ResponseUtil.buildResponse(null, "User not found", HttpStatus.NOT_FOUND, false);
                 });
     }
-
-
 }

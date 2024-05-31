@@ -1,8 +1,6 @@
 package com.demo.userlogin.springsecuritylogin.controller;
 
-import com.demo.userlogin.springsecuritylogin.dto.LoginRequest;
-import com.demo.userlogin.springsecuritylogin.dto.LoginResponse;
-import com.demo.userlogin.springsecuritylogin.dto.StandardResponse;
+import com.demo.userlogin.springsecuritylogin.dto.*;
 import com.demo.userlogin.springsecuritylogin.service.AuthService;
 import com.demo.userlogin.springsecuritylogin.util.ResponseUtil;
 import lombok.RequiredArgsConstructor;
@@ -27,5 +25,23 @@ public class AuthController {
         LoginResponse response = authService.login(loginRequest);
         log.info("User logged in successfully");
         return  ResponseUtil.buildResponse(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<StandardResponse<RefreshTokenResponse>> refresh(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+        LoginResponse response = authService.refresh(refreshTokenRequest.getRefreshToken());
+        RefreshTokenResponse refreshTokenResponse = RefreshTokenResponse.builder()
+                .token(response.getToken())
+                .refreshToken(response.getRefreshToken())
+                .build();
+        log.info("Token refreshed successfully");
+        return ResponseUtil.buildResponse(refreshTokenResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<StandardResponse<Void>> logout(@RequestBody LogoutRequest logoutRequest) {
+        authService.logout(logoutRequest.getRefreshToken());
+        log.info("User logged out successfully");
+        return ResponseUtil.buildResponse(null, HttpStatus.OK);
     }
 }

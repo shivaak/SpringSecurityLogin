@@ -25,8 +25,9 @@ security:
   jwt:
     secret-key: somerandomkey
     issuer: https://spring-security-login.com
-    validity-in-ms: 3600000 # 1 Hour
     audience: client-app-name
+    validity-in-ms: 180000 # 3 Minutes
+    refresh-token-validity-in-ms: 86400000 # 1 Day
 
 users:
   admins:

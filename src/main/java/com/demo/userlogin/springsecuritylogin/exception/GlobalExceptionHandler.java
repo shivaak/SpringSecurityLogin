@@ -1,5 +1,6 @@
 package com.demo.userlogin.springsecuritylogin.exception;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.demo.userlogin.springsecuritylogin.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -136,6 +137,16 @@ public class GlobalExceptionHandler {
                 .errorMessage(ex.getMessage())
                 .build();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+    @ExceptionHandler(JWTVerificationException.class)
+    public ResponseEntity<ErrorResponse> handleJWTVerificationException(JWTVerificationException ex) {
+        log.error("JWT verification failed: {}", ex.getMessage(), ex);
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode("BAD_REQUEST")
+                .errorMessage(ex.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
