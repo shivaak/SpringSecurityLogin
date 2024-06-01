@@ -26,7 +26,7 @@ security:
     secret-key: somerandomkey
     issuer: https://spring-security-login.com
     audience: client-app-name
-    validity-in-ms: 180000 # 3 Minutes
+    validity-in-ms: 1800000 # 30 Minutes
     refresh-token-validity-in-ms: 86400000 # 1 Day
 
 users:

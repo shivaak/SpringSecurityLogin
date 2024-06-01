@@ -4,6 +4,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.demo.userlogin.springsecuritylogin.dto.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtDecoder jwtDecoder;
     private final JwtToUserPrincipalConverter jwtToUserPrincipalConverter;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Cache<String, Boolean> accessTokenBlacklistCache;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -38,6 +40,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwtToken = authHeader.substring(7);
 
         try {
+            if (accessTokenBlacklistCache.getIfPresent(jwtToken) != null) {
+                handleException(request, response, "Token is blacklisted", HttpStatus.UNAUTHORIZED, new JWTVerificationException("Token is blacklisted"));
+                return;
+            }
+
             DecodedJWT decodedJWT = jwtDecoder.decode(jwtToken);
 
             // Ensure the token is an access token
@@ -56,9 +63,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             handleException(request, response, "Invalid or expired token", HttpStatus.UNAUTHORIZED, ex);
         } catch (Exception ex) {
             handleException(request, response, "An error occurred while processing the token", HttpStatus.INTERNAL_SERVER_ERROR, ex);
-        } finally {
-            // Clear the context after the filter chain execution to avoid any leakage of authentication info
-            //SecurityContextHolder.clearContext();
         }
     }
 

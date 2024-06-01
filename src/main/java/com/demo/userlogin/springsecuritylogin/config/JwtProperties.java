@@ -1,4 +1,4 @@
-package com.demo.userlogin.springsecuritylogin.security;
+package com.demo.userlogin.springsecuritylogin.config;
 
 import lombok.Getter;
 import lombok.Setter;
