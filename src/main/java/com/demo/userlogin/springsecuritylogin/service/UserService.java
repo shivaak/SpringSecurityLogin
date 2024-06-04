@@ -122,7 +122,8 @@ public class UserService {
         });
     }
 
-    private void validatePassword(String password) {
+    //Package-private method
+    void validatePassword(String password) {
         if (password.length() < 8) {
             throw new IllegalArgumentException("Password must be at least 8 characters long");
         }

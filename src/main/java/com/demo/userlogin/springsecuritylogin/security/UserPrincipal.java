@@ -1,14 +1,18 @@
 package com.demo.userlogin.springsecuritylogin.security;
 
+import com.demo.userlogin.springsecuritylogin.model.User;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
 
 @Data
 @Builder
+
 public class UserPrincipal implements UserDetails {
 
     private String username;
@@ -52,5 +56,18 @@ public class UserPrincipal implements UserDetails {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    // Factory method to create UserPrincipal from User
+    public static UserPrincipal create(User user) {
+        return new UserPrincipal(
+                user.getUsername(),
+                user.getPassword(),
+                Collections.singletonList(new SimpleGrantedAuthority(user.getRole().name())),
+                user.isAccountNonExpired(),
+                user.isAccountNonLocked(),
+                user.isCredentialsNonExpired(),
+                user.isEnabled()
+        );
     }
 }

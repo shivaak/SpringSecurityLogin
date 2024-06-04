@@ -1,13 +1,14 @@
 package com.demo.userlogin.springsecuritylogin.dto;
 
 import com.demo.userlogin.springsecuritylogin.model.Role;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class UpdateUserRequest {
     private Role role;
     private boolean enabled;
