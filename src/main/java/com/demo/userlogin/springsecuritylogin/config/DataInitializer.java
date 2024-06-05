@@ -3,12 +3,11 @@ package com.demo.userlogin.springsecuritylogin.config;
 import com.demo.userlogin.springsecuritylogin.model.Role;
 import com.demo.userlogin.springsecuritylogin.model.User;
 import com.demo.userlogin.springsecuritylogin.repository.UserRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import jakarta.annotation.PostConstruct;
 
 @Slf4j
 @Component
@@ -25,10 +24,14 @@ public class DataInitializer {
             log.info("No users found in the database. Creating initial users.");
 
             // Create admin users
-            userConfigProperties.getAdmins().forEach(this::createAdminUser);
+            if(userConfigProperties.getAdmins() != null) {
+                userConfigProperties.getAdmins().forEach(this::createAdminUser);
+            }
 
             // Create regular users
-            userConfigProperties.getRegulars().forEach(this::createRegularUser);
+            if(userConfigProperties.getRegulars() != null) {
+                userConfigProperties.getRegulars().forEach(this::createRegularUser);
+            }
 
             log.info("Initial users created successfully.");
         } else {

@@ -6,6 +6,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.demo.userlogin.springsecuritylogin.config.JwtProperties;
 import com.demo.userlogin.springsecuritylogin.dto.LoginRequest;
 import com.demo.userlogin.springsecuritylogin.dto.LoginResponse;
+import com.demo.userlogin.springsecuritylogin.dto.RefreshResponse;
 import com.demo.userlogin.springsecuritylogin.model.RefreshToken;
 import com.demo.userlogin.springsecuritylogin.model.Role;
 import com.demo.userlogin.springsecuritylogin.model.User;
@@ -129,20 +130,14 @@ public class AuthServiceTest {
         when(decodedJWT.getClaim("type").asString()).thenReturn("refresh");
         when(jwtToUserPrincipalConverter.convert(any(DecodedJWT.class))).thenReturn(userPrincipal);
         when(jwtIssuer.issueToken(any(UserPrincipal.class))).thenReturn("new-access-token");
-        when(jwtIssuer.issueRefreshToken(any(UserPrincipal.class))).thenReturn("new-refresh-token");
         when(refreshTokenRepository.findByToken("refresh-token")).thenReturn(Optional.of(new RefreshToken(1L, "refresh-token", user, Instant.now().plusSeconds(3600))));
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
-        LoginResponse loginResponse = authService.refresh("refresh-token");
+        RefreshResponse refreshResponse = authService.refresh("refresh-token");
 
-        assertThat(loginResponse.getToken()).isEqualTo("new-access-token");
-        assertThat(loginResponse.getRefreshToken()).isEqualTo("new-refresh-token");
+        assertThat(refreshResponse.getToken()).isEqualTo("new-access-token");
         verify(jwtDecoder).decode("refresh-token");
         verify(jwtToUserPrincipalConverter).convert(any(DecodedJWT.class));
         verify(jwtIssuer).issueToken(any(UserPrincipal.class));
-        verify(jwtIssuer).issueRefreshToken(any(UserPrincipal.class));
-        verify(refreshTokenRepository).deleteByToken("refresh-token");
-        verify(refreshTokenRepository).save(any(RefreshToken.class));
     }
 
     @Test

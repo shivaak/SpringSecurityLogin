@@ -18,6 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -34,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 @Import(TestSecurityConfig.class)
+@ActiveProfiles("test")
 public class UserControllerTest implements AutoCloseable {
 
     @Autowired
@@ -70,7 +72,7 @@ public class UserControllerTest implements AutoCloseable {
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testRegister_InvalidUsername() throws Exception {
-        RegisterRequest registerRequest = createRegisterRequest("nu", "password123", Role.ROLE_USER, "testfirstname");
+        RegisterRequest registerRequest = createRegisterRequest("nu", "password123");
 
         performPostBadRequest(registerRequest);
     }
@@ -78,7 +80,7 @@ public class UserControllerTest implements AutoCloseable {
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testRegister_InvalidPassword() throws Exception {
-        RegisterRequest registerRequest = createRegisterRequest("newuser", "pwd", Role.ROLE_USER, "testfirstname");
+        RegisterRequest registerRequest = createRegisterRequest("newuser", "pwd");
 
         performPostBadRequest(registerRequest);
     }
@@ -169,7 +171,7 @@ public class UserControllerTest implements AutoCloseable {
     public void testDisableUser_NonExistentUser() throws Exception {
         when(userService.getUserByUsername(anyString())).thenReturn(Optional.empty());
 
-        performPutNotFound("/api/v1/users/testuser/disable", null);
+        performPutNotFound("/api/v1/users/testuser/disable");
 
         verify(userService, times(1)).getUserByUsername(anyString());
         verify(userService, never()).updateUserEnabledStatus(anyString(), eq(false));
@@ -196,22 +198,22 @@ public class UserControllerTest implements AutoCloseable {
     public void testEnableUser_NonExistentUser() throws Exception {
         when(userService.getUserByUsername(anyString())).thenReturn(Optional.empty());
 
-        performPutNotFound("/api/v1/users/testuser/enable", null);
+        performPutNotFound("/api/v1/users/testuser/enable");
 
         verify(userService, times(1)).getUserByUsername(anyString());
         verify(userService, never()).updateUserEnabledStatus(anyString(), eq(true));
     }
 
     private RegisterRequest createValidRegisterRequest() {
-        return createRegisterRequest("newuser", "password123", Role.ROLE_USER, "testfirstname");
+        return createRegisterRequest("newuser", "password123");
     }
 
-    private RegisterRequest createRegisterRequest(String username, String password, Role role, String firstName) {
+    private RegisterRequest createRegisterRequest(String username, String password) {
         RegisterRequest request = new RegisterRequest();
         request.setUsername(username);
         request.setPassword(password);
-        request.setRole(role);
-        request.setFirstName(firstName);
+        request.setRole(Role.ROLE_USER);
+        request.setFirstName("testfirstname");
         return request;
     }
 
@@ -236,15 +238,15 @@ public class UserControllerTest implements AutoCloseable {
                 .andExpect(status().isCreated());
     }
 
-    private ResultActions performPostBadRequest(Object request) throws Exception {
-        return mockMvc.perform(post("/api/v1/users/register")
+    private void performPostBadRequest(Object request) throws Exception {
+        mockMvc.perform(post("/api/v1/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
-    private ResultActions performPutConflictRequest(Object request) throws Exception {
-        return mockMvc.perform(post("/api/v1/users/register")
+    private void performPutConflictRequest(Object request) throws Exception {
+        mockMvc.perform(post("/api/v1/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
@@ -257,17 +259,17 @@ public class UserControllerTest implements AutoCloseable {
                 .andExpect(status().isOk());
     }
 
-    private ResultActions performPutBadRequest(String url, Object request) throws Exception {
-        return mockMvc.perform(put(url)
+    private void performPutBadRequest(String url, Object request) throws Exception {
+        mockMvc.perform(put(url)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
-    private void performPutNotFound(String url, Object request) throws Exception {
+    private void performPutNotFound(String url) throws Exception {
         mockMvc.perform(put(url)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(null)))
                 .andExpect(status().isNotFound());
     }
 

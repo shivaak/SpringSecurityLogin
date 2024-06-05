@@ -32,10 +32,9 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<StandardResponse<RefreshTokenResponse>> refresh(@RequestBody RefreshTokenRequest refreshTokenRequest) {
-        LoginResponse response = authService.refresh(refreshTokenRequest.getRefreshToken());
+        RefreshResponse response = authService.refresh(refreshTokenRequest.getRefreshToken());
         RefreshTokenResponse refreshTokenResponse = RefreshTokenResponse.builder()
                 .token(response.getToken())
-                .refreshToken(response.getRefreshToken())
                 .build();
         log.info("Token refreshed successfully");
         return ResponseUtil.buildResponse(refreshTokenResponse, HttpStatus.OK);

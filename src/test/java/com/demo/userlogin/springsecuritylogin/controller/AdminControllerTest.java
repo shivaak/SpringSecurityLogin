@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collection;
@@ -25,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(AdminController.class)
 @Import(TestSecurityConfig.class)
+@ActiveProfiles("test")
 public class AdminControllerTest implements AutoCloseable {
 
     @Autowired
@@ -52,7 +54,7 @@ public class AdminControllerTest implements AutoCloseable {
     }
 
     @Test
-    @WithMockUser(username = "regularuser", roles = {"USER"})
+    @WithMockUser(username = "regularuser")
     public void testSayHelloToAdmin_Forbidden() throws Exception {
         mockMvc.perform(get("/api/v1/admin/hello"))
                 .andExpect(status().isForbidden());

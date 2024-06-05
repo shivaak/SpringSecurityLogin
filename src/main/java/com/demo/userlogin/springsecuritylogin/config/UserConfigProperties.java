@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
+
+// Class used to map the user configuration properties from the application.properties file
 @Getter
 @Setter
 @Configuration

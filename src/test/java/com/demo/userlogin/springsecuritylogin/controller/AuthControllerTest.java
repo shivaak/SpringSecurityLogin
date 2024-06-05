@@ -3,16 +3,12 @@ package com.demo.userlogin.springsecuritylogin.controller;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.demo.userlogin.springsecuritylogin.config.TestSecurityConfig;
-import com.demo.userlogin.springsecuritylogin.dto.LoginRequest;
-import com.demo.userlogin.springsecuritylogin.dto.LoginResponse;
-import com.demo.userlogin.springsecuritylogin.dto.LogoutRequest;
-import com.demo.userlogin.springsecuritylogin.dto.RefreshTokenRequest;
+import com.demo.userlogin.springsecuritylogin.dto.*;
 import com.demo.userlogin.springsecuritylogin.security.JwtDecoder;
 import com.demo.userlogin.springsecuritylogin.security.JwtToUserPrincipalConverter;
 import com.demo.userlogin.springsecuritylogin.security.UserPrincipal;
 import com.demo.userlogin.springsecuritylogin.service.AuthService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.benmanes.caffeine.cache.Cache;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -22,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
@@ -36,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(AuthController.class)
 @Import(TestSecurityConfig.class)
+@ActiveProfiles("test")
 public class AuthControllerTest implements AutoCloseable {
 
     @Autowired
@@ -49,12 +47,6 @@ public class AuthControllerTest implements AutoCloseable {
 
     @MockBean
     private JwtToUserPrincipalConverter jwtToUserPrincipalConverter;
-
-    @MockBean(name = "accessTokenBlacklistCache")
-    private Cache<String, Boolean> accessTokenBlacklistCache;
-
-    @MockBean(name = "refreshTokenBlacklistCache")
-    private Cache<String, Boolean> refreshTokenBlacklistCache;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -117,16 +109,15 @@ public class AuthControllerTest implements AutoCloseable {
         RefreshTokenRequest refreshTokenRequest = new RefreshTokenRequest();
         refreshTokenRequest.setRefreshToken("refresh-token");
 
-        LoginResponse loginResponse = new LoginResponse("new-access-token", "new-refresh-token");
+        RefreshResponse refreshResponse = new RefreshResponse("new-access-token");
 
-        when(authService.refresh(anyString())).thenReturn(loginResponse);
+        when(authService.refresh(anyString())).thenReturn(refreshResponse);
 
         mockMvc.perform(post("/api/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(refreshTokenRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.token", equalTo("new-access-token")))
-                .andExpect(jsonPath("$.data.refreshToken", equalTo("new-refresh-token")));
+                .andExpect(jsonPath("$.data.token", equalTo("new-access-token")));
 
         verify(authService, times(1)).refresh(anyString());
     }

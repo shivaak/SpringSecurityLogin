@@ -6,6 +6,7 @@ import com.demo.userlogin.springsecuritylogin.audit.Audit;
 import com.demo.userlogin.springsecuritylogin.config.JwtProperties;
 import com.demo.userlogin.springsecuritylogin.dto.LoginRequest;
 import com.demo.userlogin.springsecuritylogin.dto.LoginResponse;
+import com.demo.userlogin.springsecuritylogin.dto.RefreshResponse;
 import com.demo.userlogin.springsecuritylogin.model.RefreshToken;
 import com.demo.userlogin.springsecuritylogin.model.User;
 import com.demo.userlogin.springsecuritylogin.repository.RefreshTokenRepository;
@@ -66,7 +67,7 @@ public class AuthService {
 
     @Audit(action = "Refresh Token", logPoint = Audit.LogPoint.AFTER)
     @Transactional
-    public LoginResponse refresh(String refreshToken) {
+    public RefreshResponse refresh(String refreshToken) {
         DecodedJWT decodedJWT = jwtDecoder.decode(refreshToken);
 
         // Ensure the token is a refresh token
@@ -78,19 +79,10 @@ public class AuthService {
         validateStoredRefreshToken(refreshToken);
 
         UserPrincipal userPrincipal = jwtToUserPrincipalConverter.convert(decodedJWT);
-
         String token = jwtIssuer.issueToken(userPrincipal);
-        String newRefreshToken = jwtIssuer.issueRefreshToken(userPrincipal);
 
-        // Invalidate the old refresh token
-        invalidateOldRefreshToken(refreshToken);
-
-        // Save the new refresh token
-        saveRefreshToken(userPrincipal.getUsername(), newRefreshToken);
-
-        return LoginResponse.builder()
+        return RefreshResponse.builder()
                 .token(token)
-                .refreshToken(newRefreshToken)
                 .build();
     }
 
@@ -149,6 +141,8 @@ public class AuthService {
                 .orElseThrow(() -> new JWTVerificationException("Invalid refresh token"));
 
         if (token.getExpiryDate().isBefore(Instant.now())) {
+            // Delete the refresh token from the database
+            refreshTokenRepository.deleteByToken(refreshToken);
             throw new JWTVerificationException("Refresh token expired");
         }
 
