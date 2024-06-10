@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/admin")
 @Slf4j
 public class AdminController {
+
     @GetMapping("/hello")
     public String sayHelloToAdmin(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         if (userPrincipal == null) {

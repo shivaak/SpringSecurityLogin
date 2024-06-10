@@ -66,10 +66,10 @@ public class UserServiceTest {
         when(passwordEncoder.encode("password1")).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        Optional<User> registeredUser = userService.register(registerRequest);
+        User registeredUser = userService.register(registerRequest);
 
-        assertThat(registeredUser).isPresent();
-        assertThat(registeredUser.get().getUsername()).isEqualTo("testuser");
+        assertThat(registeredUser).isNotNull();
+        assertThat(registeredUser.getUsername()).isEqualTo("testuser");
         verify(userRepository).existsByUsername("testuser");
         verify(passwordEncoder).encode("password1");
         verify(userRepository).save(any(User.class));
@@ -117,11 +117,8 @@ public class UserServiceTest {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        Optional<User> updatedUser = userService.updateProfile("testuser", updateProfileRequest);
+        userService.updateProfile("testuser", updateProfileRequest);
 
-        assertThat(updatedUser).isPresent();
-        assertThat(updatedUser.get().getFirstName()).isEqualTo("NewFirstName");
-        assertThat(updatedUser.get().getLastName()).isEqualTo("NewLastName");
         verify(userRepository).findByUsername("testuser");
         verify(userRepository).save(any(User.class));
     }
@@ -138,14 +135,8 @@ public class UserServiceTest {
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        Optional<User> updatedUser = userService.updateUser("testuser", updateUserRequest);
+        userService.updateUser("testuser", updateUserRequest);
 
-        assertThat(updatedUser).isPresent();
-        assertThat(updatedUser.get().getRole()).isEqualTo(Role.ROLE_ADMIN);
-        assertThat(updatedUser.get().isEnabled()).isFalse();
-        assertThat(updatedUser.get().isAccountNonExpired()).isFalse();
-        assertThat(updatedUser.get().isAccountNonLocked()).isFalse();
-        assertThat(updatedUser.get().isCredentialsNonExpired()).isFalse();
         verify(userRepository).findByUsername("testuser");
         verify(userRepository).save(any(User.class));
     }

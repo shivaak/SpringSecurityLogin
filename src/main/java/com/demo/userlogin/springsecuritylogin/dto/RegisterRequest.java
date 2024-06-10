@@ -31,7 +31,7 @@ public class RegisterRequest {
     private String firstName;
 
     @AuditableField
-    private String LastName;
+    private String lastName;
 
     @AuditableField
     private Role role;

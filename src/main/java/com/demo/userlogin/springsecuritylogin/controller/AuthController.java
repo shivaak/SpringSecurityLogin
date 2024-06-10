@@ -1,10 +1,10 @@
 package com.demo.userlogin.springsecuritylogin.controller;
 
 import com.demo.userlogin.springsecuritylogin.dto.*;
-import com.demo.userlogin.springsecuritylogin.security.JwtDecoder;
 import com.demo.userlogin.springsecuritylogin.service.AuthService;
 import com.demo.userlogin.springsecuritylogin.util.ResponseUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,17 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
    private final AuthService authService;
-   private final JwtDecoder jwtDecoder;
 
     @PostMapping("/login")
-    public ResponseEntity<StandardResponse<LoginResponse>> login(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<StandardResponse<LoginResponse>> login(@Valid  @RequestBody LoginRequest loginRequest){
         LoginResponse response = authService.login(loginRequest);
         log.info("User logged in successfully");
         return  ResponseUtil.buildResponse(response, HttpStatus.OK);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<StandardResponse<RefreshTokenResponse>> refresh(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+    public ResponseEntity<StandardResponse<RefreshTokenResponse>> refresh(@Valid  @RequestBody RefreshTokenRequest refreshTokenRequest) {
         RefreshResponse response = authService.refresh(refreshTokenRequest.getRefreshToken());
         RefreshTokenResponse refreshTokenResponse = RefreshTokenResponse.builder()
                 .token(response.getToken())
@@ -41,7 +40,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<StandardResponse<String>> logout(@RequestBody LogoutRequest logoutRequest, HttpServletRequest request) {
+    public ResponseEntity<StandardResponse<String>> logout(@Valid @RequestBody LogoutRequest logoutRequest, HttpServletRequest request) {
         final String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseUtil.buildResponse("Token not found", HttpStatus.BAD_REQUEST);

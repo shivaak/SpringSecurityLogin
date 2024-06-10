@@ -6,6 +6,7 @@ import com.demo.userlogin.springsecuritylogin.dto.RegisterRequest;
 import com.demo.userlogin.springsecuritylogin.dto.UpdateProfileRequest;
 import com.demo.userlogin.springsecuritylogin.dto.UpdateUserRequest;
 import com.demo.userlogin.springsecuritylogin.exception.UserAlreadyExistsException;
+import com.demo.userlogin.springsecuritylogin.exception.UserNotFoundException;
 import com.demo.userlogin.springsecuritylogin.model.User;
 import com.demo.userlogin.springsecuritylogin.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -26,7 +27,7 @@ public class UserService {
 
     @Audit(action = "Register User")
     @Transactional
-    public Optional<User> register(RegisterRequest registerRequest) {
+    public User register(RegisterRequest registerRequest) {
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
             throw new UserAlreadyExistsException("User with username " + registerRequest.getUsername() + " already exists.");
         }
@@ -44,11 +45,7 @@ public class UserService {
                 .credentialsNonExpired(true)
                 .build();
 
-        return Optional.of(userRepository.save(user));
-    }
-
-    public Optional<User> getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.save(user);
     }
 
     @Audit(action = "Delete User")
@@ -59,30 +56,53 @@ public class UserService {
 
     @Audit(action = "Update UserProfile")
     @Transactional
-    public Optional<User> updateProfile(@AuditableField  String username, UpdateProfileRequest updateProfileRequest) {
-        return userRepository.findByUsername(username).map(user -> {
-            user.setFirstName(updateProfileRequest.getFirstName());
-            user.setLastName(updateProfileRequest.getLastName());
-            return Optional.of(userRepository.save(user));
-        }).orElse(Optional.empty());
+    public void updateProfile(@AuditableField String username, UpdateProfileRequest updateProfileRequest) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+
+        user.setFirstName(updateProfileRequest.getFirstName());
+        user.setLastName(updateProfileRequest.getLastName());
+
+        userRepository.save(user);
     }
 
     @Audit(action = "Update UserAccount")
     @Transactional
-    public Optional<User> updateUser(@AuditableField String username, @AuditableField  UpdateUserRequest updateUserRequest) {
-        return userRepository.findByUsername(username).map(user -> {
-            user.setRole(updateUserRequest.getRole());
-            user.setEnabled(updateUserRequest.isEnabled());
-            user.setAccountNonExpired(updateUserRequest.isAccountNonExpired());
-            user.setAccountNonLocked(updateUserRequest.isAccountNonLocked());
-            user.setCredentialsNonExpired(updateUserRequest.isCredentialsNonExpired());
-            return Optional.of(userRepository.save(user));
-        }).orElse(Optional.empty());
+    public void updateUser(@AuditableField String username, @AuditableField UpdateUserRequest updateUserRequest) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+
+        user.setRole(updateUserRequest.getRole());
+        user.setEnabled(updateUserRequest.isEnabled());
+        user.setAccountNonExpired(updateUserRequest.isAccountNonExpired());
+        user.setAccountNonLocked(updateUserRequest.isAccountNonLocked());
+        user.setCredentialsNonExpired(updateUserRequest.isCredentialsNonExpired());
+
+        userRepository.save(user);
     }
 
-    @Audit(action = "Update UserEnabledStatus")
+    @Audit(action = "Disable User")
     @Transactional
-    public void updateUserEnabledStatus(@AuditableField String username,@AuditableField boolean enabled) {
+    public void disableUser(@AuditableField  String username) {
+        User user = getUserByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+        updateUserEnabledStatus(username, false);
+    }
+
+    @Audit(action = "Enable User")
+    @Transactional
+    public void enableUser(@AuditableField  String username) {
+        User user = getUserByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+        updateUserEnabledStatus(username, true);
+    }
+
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Transactional
+    public void updateUserEnabledStatus(String username, boolean enabled) {
         userRepository.updateEnabledStatus(username, enabled);
     }
 

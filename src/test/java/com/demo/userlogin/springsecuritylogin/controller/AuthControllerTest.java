@@ -132,7 +132,7 @@ public class AuthControllerTest implements AutoCloseable {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(logoutRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", equalTo("Logout successful")));
+                .andExpect(jsonPath("$.message", equalTo("Logout successful")));
 
         verify(authService, times(1)).logout(anyString(), anyString());
     }
@@ -146,7 +146,7 @@ public class AuthControllerTest implements AutoCloseable {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(logoutRequest)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.data", equalTo("Token not found")));
+                .andExpect(jsonPath("$.message", equalTo("Token not found")));
 
         verify(authService, never()).logout(anyString(), anyString());
     }

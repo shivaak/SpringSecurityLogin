@@ -1,3 +1,5 @@
+# Integration Test properties
+
 spring:
   datasource:
     url: jdbc:h2:mem:testdb
@@ -9,3 +11,31 @@ spring:
   h2:
     console:
       enabled: true
+
+security:
+  jwt:
+    secret-key: somerandomkey
+    issuer: https://spring-security-login.com
+    audience: client-app-name
+    validity-in-ms: 300000  # 5 minutes
+    refresh-token-validity-in-ms: 600000  # 10 minutes
+
+users:
+  admins:
+    - username: admin1
+      password: admin123
+      firstName: Admin
+      lastName: User1
+    - username: admin2
+      password: admin123
+      firstName: Admin
+      lastName: User2
+  regulars:
+    - username: user1
+      password: user123
+      firstName: Regular
+      lastName: User1
+    - username: user2
+      password: user123
+      firstName: Regular
+      lastName: User2

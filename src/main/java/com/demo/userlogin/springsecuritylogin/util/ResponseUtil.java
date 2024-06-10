@@ -6,6 +6,11 @@ import org.springframework.http.ResponseEntity;
 
 public class ResponseUtil {
 
+    public static ResponseEntity<StandardResponse<String>> buildResponse(String message, HttpStatus status) {
+        StandardResponse<String> response = new StandardResponse<>("", message);
+        return new ResponseEntity<>(response, status);
+    }
+
     public static <T> ResponseEntity<StandardResponse<T>> buildResponse(T data, HttpStatus status) {
         StandardResponse<T> response = new StandardResponse<>(data);
         return new ResponseEntity<>(response, status);
