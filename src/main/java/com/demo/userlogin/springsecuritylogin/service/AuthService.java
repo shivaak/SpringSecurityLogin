@@ -5,9 +5,9 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.demo.userlogin.springsecuritylogin.audit.Audit;
 import com.demo.userlogin.springsecuritylogin.config.JwtProperties;
 import com.demo.userlogin.springsecuritylogin.dto.LoginRequest;
-import com.demo.userlogin.springsecuritylogin.dto.LoginResponse;
-import com.demo.userlogin.springsecuritylogin.dto.RefreshResponse;
+import com.demo.userlogin.springsecuritylogin.dto.RefreshTokenResponse;
 import com.demo.userlogin.springsecuritylogin.model.RefreshToken;
+import com.demo.userlogin.springsecuritylogin.model.Role;
 import com.demo.userlogin.springsecuritylogin.model.User;
 import com.demo.userlogin.springsecuritylogin.repository.RefreshTokenRepository;
 import com.demo.userlogin.springsecuritylogin.repository.UserRepository;
@@ -27,6 +27,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +46,7 @@ public class AuthService {
     private final Cache<String, Boolean> refreshTokenBlacklistCache;
 
     @Audit(action = "Login", logPoint = Audit.LogPoint.AFTER)
-    public LoginResponse login(LoginRequest loginRequest) {
+    public Map<String,Object> login(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
@@ -59,20 +61,28 @@ public class AuthService {
 
         saveRefreshToken(userPrincipal.getUsername(), refreshToken);
 
-        return LoginResponse.builder()
-                .token(token)
-                .refreshToken(refreshToken)
-                .build();
+        // Get role values from the UserPrincipal
+        int[] roles = userPrincipal.getAuthorities().stream()
+                .map(authority -> Role.valueOf(authority.getAuthority()).getValue())
+                .mapToInt(Integer::intValue)
+                .toArray();
+
+        // Create a map to return
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("accessToken", token);
+        responseMap.put("refreshToken", refreshToken);
+        responseMap.put("roles", roles);
+        return  responseMap;
     }
 
     @Audit(action = "Refresh Token", logPoint = Audit.LogPoint.AFTER)
     @Transactional
-    public RefreshResponse refresh(String refreshToken) {
+    public RefreshTokenResponse refresh(String refreshToken) {
         DecodedJWT decodedJWT = jwtDecoder.decode(refreshToken);
 
         // Ensure the token is a refresh token
         if (!"refresh".equals(decodedJWT.getClaim("type").asString())) {
-            throw new JWTVerificationException("Invalid token for refresh");
+            throw new JWTVerificationException("Invalid token type for refresh");
         }
 
         // Validate the refresh token
@@ -80,9 +90,15 @@ public class AuthService {
 
         UserPrincipal userPrincipal = jwtToUserPrincipalConverter.convert(decodedJWT);
         String token = jwtIssuer.issueToken(userPrincipal);
+        // Get role values from the UserPrincipal
+        int[] roles = userPrincipal.getAuthorities().stream()
+                .map(authority -> Role.valueOf(authority.getAuthority()).getValue())
+                .mapToInt(Integer::intValue)
+                .toArray();
 
-        return RefreshResponse.builder()
+        return RefreshTokenResponse.builder()
                 .token(token)
+                .roles(roles)
                 .build();
     }
 

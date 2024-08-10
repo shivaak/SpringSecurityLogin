@@ -12,18 +12,19 @@ import java.util.concurrent.TimeUnit;
 public class CaffeineCacheConfig {
 
     private final JwtProperties jwtProperties;
+    private final int BUFFER_TIME_IN_MS = 300000; // 5 minutes
 
     @Bean
     public com.github.benmanes.caffeine.cache.Cache<String, Boolean> accessTokenBlacklistCache() {
         return Caffeine.newBuilder()
-                .expireAfterWrite(jwtProperties.getValidityInMs(), TimeUnit.MILLISECONDS)
+                .expireAfterWrite(jwtProperties.getValidityInMs() + BUFFER_TIME_IN_MS, TimeUnit.MILLISECONDS)
                 .build();
     }
 
     @Bean
     public com.github.benmanes.caffeine.cache.Cache<String, Boolean> refreshTokenBlacklistCache() {
         return Caffeine.newBuilder()
-                .expireAfterWrite(jwtProperties.getRefreshTokenValidityInMs(), TimeUnit.MILLISECONDS)
+                .expireAfterWrite(jwtProperties.getRefreshTokenValidityInMs() + BUFFER_TIME_IN_MS, TimeUnit.MILLISECONDS)
                 .build();
     }
 }

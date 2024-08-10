@@ -7,6 +7,7 @@ import com.demo.userlogin.springsecuritylogin.dto.UpdateProfileRequest;
 import com.demo.userlogin.springsecuritylogin.dto.UpdateUserRequest;
 import com.demo.userlogin.springsecuritylogin.exception.UserAlreadyExistsException;
 import com.demo.userlogin.springsecuritylogin.exception.UserNotFoundException;
+import com.demo.userlogin.springsecuritylogin.model.Role;
 import com.demo.userlogin.springsecuritylogin.model.User;
 import com.demo.userlogin.springsecuritylogin.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -28,6 +29,12 @@ public class UserService {
     @Audit(action = "Register User")
     @Transactional
     public User register(RegisterRequest registerRequest) {
+
+        //Default to user role if not provided
+        if(registerRequest.getRole() == null) {
+            registerRequest.setRole(Role.ROLE_USER);
+        }
+
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
             throw new UserAlreadyExistsException("User with username " + registerRequest.getUsername() + " already exists.");
         }

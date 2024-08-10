@@ -7,5 +7,5 @@ import lombok.Data;
 @Builder
 public class RefreshTokenResponse {
     private String token;
-    private String refreshToken;
+    private int[] roles;
 }

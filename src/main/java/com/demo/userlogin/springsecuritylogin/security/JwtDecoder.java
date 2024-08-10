@@ -18,9 +18,14 @@ import java.time.Instant;
 public class JwtDecoder {
 
     private final JwtProperties jwtProperties;
+    private String tokenType;
 
     public DecodedJWT decode(String token) {
+        if(token==null){
+            throw new JWTVerificationException("Token is NULL");
+        }
         try {
+            tokenType = getTokenType(token);
             Algorithm algorithm = Algorithm.HMAC256(jwtProperties.getSecretKey());
             JWTVerifier verifier = JWT.require(algorithm)
                     .withIssuer(jwtProperties.getIssuer())
@@ -37,14 +42,28 @@ public class JwtDecoder {
             }
 
 
-            log.info("Token verified successfully for user: {}", decodedJWT.getSubject());
+            log.info("{} Token verified successfully for user: {}", decodedJWT.getClaim("type"),decodedJWT.getSubject());
             return decodedJWT;
         } catch (JWTVerificationException e) {
-            log.error("Token verification failed: {}", e.getMessage());
+            log.error("{} Token verification failed: {}", tokenType, e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("Internal error while decoding the token: {}", e.getMessage());
+            log.error("Internal error while decoding the {} token: {}", tokenType, e.getMessage());
             throw e;
         }
+    }
+
+    public String getSubject(String token) {
+        if(token==null){
+            return "NULL_TOKEN";
+        }
+        return JWT.decode(token).getSubject();
+    }
+
+    public String getTokenType(String token) {
+        if(token==null){
+            return "NULL_TOKEN";
+        }
+        return JWT.decode(token).getClaim("type").asString();
     }
 }

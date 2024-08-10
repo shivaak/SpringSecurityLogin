@@ -21,7 +21,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+   // @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value="/register", consumes = "application/json")
     public ResponseEntity<StandardResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest registerRequest) {
         User user = userService.register(registerRequest);

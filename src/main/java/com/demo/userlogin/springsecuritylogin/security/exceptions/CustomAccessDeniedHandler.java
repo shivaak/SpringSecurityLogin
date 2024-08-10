@@ -2,7 +2,6 @@ package com.demo.userlogin.springsecuritylogin.security.exceptions;
 
 import com.demo.userlogin.springsecuritylogin.dto.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +29,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         String method = request.getMethod();
 
         log.error("Access denied for user '{}', method: '{}', URI: '{}'. Reason: {}",
-                username, method, requestURI, accessDeniedException.getMessage());
+                username, method, requestURI, accessDeniedException.getMessage(), accessDeniedException);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errorCode("FORBIDDEN")
